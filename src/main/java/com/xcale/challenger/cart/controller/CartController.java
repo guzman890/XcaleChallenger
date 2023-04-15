@@ -13,24 +13,21 @@ import reactor.core.publisher.Mono;
 public class CartController {
     @Autowired
     private CartService cartService;
-    @GetMapping("/")
-    public Flux<Cart> getProduct(){
-        return cartService.getAll();
-
-    }
 
     @GetMapping("/{idCart}")
-    public Mono<ResponseEntity<Cart>> getProduct(@PathVariable("idCart") int idCart){
+    public Mono<ResponseEntity<Cart>> getCart(@PathVariable("idCart") int idCart){
         return cartService.get(idCart)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .onErrorReturn(ResponseEntity.badRequest().build());
     }
 
-    @PostMapping("/")
+    @PostMapping("")
     public Mono<ResponseEntity<Cart>> save( @RequestBody Cart Cart){
         return cartService.save(Cart)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .defaultIfEmpty(ResponseEntity.badRequest().build())
+                .onErrorReturn(ResponseEntity.badRequest().build());
     }
 
     @PutMapping("/{idCart}")
@@ -39,13 +36,15 @@ public class CartController {
             @RequestBody Cart Cart){
         return cartService.update(idCart,Cart)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .onErrorReturn(ResponseEntity.badRequest().build());
     }
 
     @DeleteMapping("/{idCart}")
-    public Mono<ResponseEntity<Void>> delete( @PathVariable("idCart") int idCart){
+    public Mono<ResponseEntity<Boolean>> delete( @PathVariable("idCart") int idCart){
         return cartService.delete(idCart)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .onErrorReturn(ResponseEntity.badRequest().build());
     }
 }

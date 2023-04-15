@@ -8,30 +8,39 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 @Service
 public class CartServiceImpl implements CartService {
     @Autowired
     private CartRepository cartRepository;
     @Override
-    public Flux<Cart> getAll() {
-        return cartRepository.getAll();
-    }
-    @Override
     public Mono<Cart> get(int idCart) {
-        return cartRepository.get(idCart);
+        return Mono.just(cartRepository.getCart(idCart));
     }
     @Override
     public Mono<Cart> save(Cart cart) {
-        return cartRepository.save(cart);
+        Cart cartRD = cartRepository.getCart(cart.getId());
+        if( Objects.nonNull(cartRD) )
+            return Mono.empty();
+        return Mono.just(cartRepository.saveCart(cart));
     }
 
     @Override
     public Mono<Cart> update(int idCart, Cart cart) {
-        return cartRepository.update(idCart,cart);
+        Cart cartRD = cartRepository.getCart(idCart);
+        if( Objects.isNull(cartRD) )
+            return Mono.empty();
+        cartRD.setProducts(cart.getProducts());
+        return Mono.just(cartRepository.updateCart(cartRD));
     }
 
     @Override
-    public Mono<Void> delete(int idCart) {
-        return cartRepository.delete(idCart);
+    public Mono<Boolean> delete(int idCart) {
+        Cart cartRD = cartRepository.getCart(idCart);
+        if( Objects.isNull(cartRD) )
+            return Mono.empty();
+        cartRepository.deleteCart(idCart);
+        return Mono.just(Boolean.TRUE);
     }
 }
